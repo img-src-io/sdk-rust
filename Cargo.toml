@@ -1,0 +1,27 @@
+[package]
+name = "img_src"
+version = "0.1.0"
+authors = ["Taehun <taehun@taehun.dev>"]
+description = "Rust SDK for img-src image processing and delivery API"
+license = "MIT"
+edition = "2021"
+repository = "https://github.com/img-src-io/sdk-rust"
+documentation = "https://docs.rs/img_src"
+homepage = "https://docs.img-src.io"
+readme = "README.md"
+keywords = ["image", "api", "sdk", "cdn", "cloudflare"]
+categories = ["api-bindings", "web-programming"]
+
+[dependencies]
+serde = { version = "^1.0", features = ["derive"] }
+serde_json = "^1.0"
+serde_repr = "^0.1"
+url = "^2.5"
+tokio = { version = "^1.46.0", features = ["fs"] }
+tokio-util = { version = "^0.7", features = ["codec"] }
+reqwest = { version = "^0.12", default-features = false, features = ["json", "multipart", "stream"] }
+
+[features]
+default = ["native-tls"]
+native-tls = ["reqwest/native-tls"]
+rustls-tls = ["reqwest/rustls-tls"]
