@@ -20,17 +20,17 @@ pub struct Preset {
     #[serde(rename = "name")]
     pub name: String,
     /// Optional description
-    #[serde(rename = "description")]
-    pub description: String,
+    #[serde(rename = "description", skip_serializing_if = "Option::is_none")]
+    pub description: Option<String>,
     /// Transformation parameters
     #[serde(rename = "params")]
     pub params: std::collections::HashMap<String, serde_json::Value>,
     /// Creation timestamp (Unix epoch)
     #[serde(rename = "created_at")]
-    pub created_at: i32,
+    pub created_at: i64,
     /// Last update timestamp (Unix epoch)
     #[serde(rename = "updated_at")]
-    pub updated_at: i32,
+    pub updated_at: i64,
     /// Number of times this preset has been used
     #[serde(rename = "usage_count")]
     pub usage_count: i32,
@@ -40,16 +40,15 @@ impl Preset {
     pub fn new(
         id: String,
         name: String,
-        description: String,
         params: std::collections::HashMap<String, serde_json::Value>,
-        created_at: i32,
-        updated_at: i32,
+        created_at: i64,
+        updated_at: i64,
         usage_count: i32,
     ) -> Preset {
         Preset {
             id,
             name,
-            description,
+            description: None,
             params,
             created_at,
             updated_at,

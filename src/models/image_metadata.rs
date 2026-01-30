@@ -21,7 +21,7 @@ pub struct ImageMetadata {
     pub original_filename: String,
     /// File size in bytes
     #[serde(rename = "size")]
-    pub size: i32,
+    pub size: i64,
     /// Upload timestamp
     #[serde(rename = "uploaded_at")]
     pub uploaded_at: String,
@@ -43,7 +43,7 @@ impl ImageMetadata {
     pub fn new(
         hash: String,
         original_filename: String,
-        size: i32,
+        size: i64,
         uploaded_at: String,
         mime_type: String,
     ) -> ImageMetadata {

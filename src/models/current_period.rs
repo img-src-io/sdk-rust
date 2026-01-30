@@ -18,16 +18,16 @@ pub struct CurrentPeriod {
     pub period: String,
     /// Unix timestamp of period start
     #[serde(rename = "period_start")]
-    pub period_start: i32,
+    pub period_start: i64,
     /// Unix timestamp of period end
     #[serde(rename = "period_end")]
-    pub period_end: i32,
+    pub period_end: i64,
     /// Uploads this period
     #[serde(rename = "uploads")]
     pub uploads: i32,
     /// Bandwidth used this period in bytes
     #[serde(rename = "bandwidth_bytes")]
-    pub bandwidth_bytes: i32,
+    pub bandwidth_bytes: i64,
     /// API requests this period
     #[serde(rename = "api_requests")]
     pub api_requests: i32,
@@ -39,10 +39,10 @@ pub struct CurrentPeriod {
 impl CurrentPeriod {
     pub fn new(
         period: String,
-        period_start: i32,
-        period_end: i32,
+        period_start: i64,
+        period_end: i64,
         uploads: i32,
-        bandwidth_bytes: i32,
+        bandwidth_bytes: i64,
         api_requests: i32,
         transformations: i32,
     ) -> CurrentPeriod {

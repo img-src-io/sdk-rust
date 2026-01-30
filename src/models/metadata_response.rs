@@ -16,6 +16,9 @@ pub struct MetadataResponse {
     /// Image ID
     #[serde(rename = "id")]
     pub id: String,
+    /// Image visibility (public or private)
+    #[serde(rename = "visibility")]
+    pub visibility: String,
     #[serde(rename = "metadata")]
     pub metadata: Box<models::ImageMetadata>,
     #[serde(rename = "urls")]
@@ -27,12 +30,14 @@ pub struct MetadataResponse {
 impl MetadataResponse {
     pub fn new(
         id: String,
+        visibility: String,
         metadata: models::ImageMetadata,
         urls: models::CdnUrls,
         _links: models::HateoasLinks,
     ) -> MetadataResponse {
         MetadataResponse {
             id,
+            visibility,
             metadata: Box::new(metadata),
             urls: Box::new(urls),
             _links: Box::new(_links),

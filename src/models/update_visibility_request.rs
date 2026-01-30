@@ -12,21 +12,14 @@ use crate::models;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
-pub struct ApiKeyListResponse {
-    /// List of API keys
-    #[serde(rename = "api_keys")]
-    pub api_keys: Vec<models::ApiKeyResponse>,
-    /// Total number of API keys
-    #[serde(rename = "total")]
-    pub total: i32,
+pub struct UpdateVisibilityRequest {
+    /// Image visibility
+    #[serde(rename = "visibility")]
+    pub visibility: String,
 }
 
-impl ApiKeyListResponse {
-    pub fn new(api_keys: Vec<models::ApiKeyResponse>, total: i32) -> ApiKeyListResponse {
-        ApiKeyListResponse {
-            api_keys,
-            total,
-        }
+impl UpdateVisibilityRequest {
+    pub fn new(visibility: String) -> UpdateVisibilityRequest {
+        UpdateVisibilityRequest { visibility }
     }
 }
-

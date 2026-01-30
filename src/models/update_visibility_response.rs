@@ -12,45 +12,24 @@ use crate::models;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
-pub struct ApiKeyResponse {
-    /// API key UUID
+pub struct UpdateVisibilityResponse {
+    /// Image ID
     #[serde(rename = "id")]
     pub id: String,
-    /// Key name
-    #[serde(rename = "name")]
-    pub name: String,
-    /// Key prefix (first 14 chars)
-    #[serde(rename = "key_prefix")]
-    pub key_prefix: String,
-    /// Granted scopes
-    #[serde(rename = "scopes")]
-    pub scopes: String,
-    /// Creation timestamp (Unix epoch)
-    #[serde(rename = "created_at")]
-    pub created_at: i32,
-    /// Last used timestamp (Unix epoch)
-    #[serde(rename = "last_used_at", skip_serializing_if = "Option::is_none")]
-    pub last_used_at: Option<i32>,
-    /// Expiration timestamp (Unix epoch)
-    #[serde(rename = "expires_at", skip_serializing_if = "Option::is_none")]
-    pub expires_at: Option<i32>,
-    /// Total requests made with this key
-    #[serde(rename = "total_requests")]
-    pub total_requests: i32,
+    /// Image visibility
+    #[serde(rename = "visibility")]
+    pub visibility: String,
+    /// Success message
+    #[serde(rename = "message")]
+    pub message: String,
 }
 
-impl ApiKeyResponse {
-    pub fn new(id: String, name: String, key_prefix: String, scopes: String, created_at: i32, total_requests: i32) -> ApiKeyResponse {
-        ApiKeyResponse {
+impl UpdateVisibilityResponse {
+    pub fn new(id: String, visibility: String, message: String) -> UpdateVisibilityResponse {
+        UpdateVisibilityResponse {
             id,
-            name,
-            key_prefix,
-            scopes,
-            created_at,
-            last_used_at: None,
-            expires_at: None,
-            total_requests,
+            visibility,
+            message,
         }
     }
 }
-

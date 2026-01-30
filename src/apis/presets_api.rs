@@ -123,15 +123,15 @@ pub async fn create_preset(
 /// Deletes a preset. Requires Pro plan.
 pub async fn delete_preset(
     configuration: &configuration::Configuration,
-    id: &str,
+    name: &str,
 ) -> Result<models::DeletePresetResponse, Error<DeletePresetError>> {
     // add a prefix to parameters to efficiently prevent name collisions
-    let p_path_id = id;
+    let p_path_name = name;
 
     let uri_str = format!(
-        "{}/api/v1/settings/presets/{id}",
+        "{}/api/v1/settings/presets/{name}",
         configuration.base_path,
-        id = crate::apis::urlencode(p_path_id)
+        name = crate::apis::urlencode(p_path_name)
     );
     let mut req_builder = configuration
         .client
