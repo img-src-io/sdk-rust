@@ -25,9 +25,12 @@ pub struct SearchResult {
     /// All paths for this image
     #[serde(rename = "paths")]
     pub paths: Vec<String>,
+    /// Image visibility (public or private)
+    #[serde(rename = "visibility")]
+    pub visibility: String,
     /// File size in bytes
     #[serde(rename = "size")]
-    pub size: i32,
+    pub size: i64,
     /// Upload timestamp
     #[serde(rename = "uploaded_at")]
     pub uploaded_at: String,
@@ -44,7 +47,8 @@ impl SearchResult {
         id: String,
         original_filename: String,
         paths: Vec<String>,
-        size: i32,
+        visibility: String,
+        size: i64,
         uploaded_at: String,
         url: String,
     ) -> SearchResult {
@@ -53,6 +57,7 @@ impl SearchResult {
             original_filename,
             sanitized_filename: None,
             paths,
+            visibility,
             size,
             uploaded_at,
             url,

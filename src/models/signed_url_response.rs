@@ -18,14 +18,14 @@ pub struct SignedUrlResponse {
     pub signed_url: String,
     /// Expiration timestamp (Unix epoch)
     #[serde(rename = "expires_at")]
-    pub expires_at: i32,
+    pub expires_at: i64,
     /// Seconds until expiration
     #[serde(rename = "expires_in_seconds")]
     pub expires_in_seconds: i32,
 }
 
 impl SignedUrlResponse {
-    pub fn new(signed_url: String, expires_at: i32, expires_in_seconds: i32) -> SignedUrlResponse {
+    pub fn new(signed_url: String, expires_at: i64, expires_in_seconds: i32) -> SignedUrlResponse {
         SignedUrlResponse {
             signed_url,
             expires_at,

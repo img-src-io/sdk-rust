@@ -12,41 +12,20 @@ use crate::models;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
-pub struct CreateApiKeyResponse {
-    /// API key UUID
-    #[serde(rename = "id")]
-    pub id: String,
-    /// Full API key (shown ONLY ONCE)
-    #[serde(rename = "key")]
-    pub key: String,
-    /// Key prefix
-    #[serde(rename = "key_prefix")]
-    pub key_prefix: String,
-    /// Key name
-    #[serde(rename = "name")]
-    pub name: String,
-    /// Granted scopes
-    #[serde(rename = "scopes")]
-    pub scopes: String,
-    /// Creation timestamp
-    #[serde(rename = "created_at")]
-    pub created_at: i32,
-    /// Expiration timestamp
-    #[serde(rename = "expires_at", skip_serializing_if = "Option::is_none")]
-    pub expires_at: Option<i32>,
+pub struct ActiveSignedUrl {
+    /// Time-limited signed URL
+    #[serde(rename = "signed_url")]
+    pub signed_url: String,
+    /// Expiration timestamp (Unix epoch)
+    #[serde(rename = "expires_at")]
+    pub expires_at: i64,
 }
 
-impl CreateApiKeyResponse {
-    pub fn new(id: String, key: String, key_prefix: String, name: String, scopes: String, created_at: i32) -> CreateApiKeyResponse {
-        CreateApiKeyResponse {
-            id,
-            key,
-            key_prefix,
-            name,
-            scopes,
-            created_at,
-            expires_at: None,
+impl ActiveSignedUrl {
+    pub fn new(signed_url: String, expires_at: i64) -> ActiveSignedUrl {
+        ActiveSignedUrl {
+            signed_url,
+            expires_at,
         }
     }
 }
-

@@ -16,15 +16,12 @@ pub struct CreateSignedUrlRequest {
     /// Expiration time in seconds (60-86400, default 3600)
     #[serde(rename = "expires_in_seconds", skip_serializing_if = "Option::is_none")]
     pub expires_in_seconds: Option<i32>,
-    #[serde(rename = "transformation", skip_serializing_if = "Option::is_none")]
-    pub transformation: Option<Box<models::CreateSignedUrlRequestTransformation>>,
 }
 
 impl CreateSignedUrlRequest {
     pub fn new() -> CreateSignedUrlRequest {
         CreateSignedUrlRequest {
             expires_in_seconds: None,
-            transformation: None,
         }
     }
 }

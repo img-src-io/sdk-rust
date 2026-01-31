@@ -12,21 +12,24 @@ use crate::models;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
-pub struct DeleteApiKeyResponse {
-    /// Operation success flag
-    #[serde(rename = "success")]
-    pub success: bool,
-    /// Human-readable message
-    #[serde(rename = "message")]
-    pub message: String,
+pub struct Credits {
+    /// Storage credits in bytes
+    #[serde(rename = "storage_bytes")]
+    pub storage_bytes: i64,
+    /// API request credits
+    #[serde(rename = "api_requests")]
+    pub api_requests: i64,
+    /// Transformation credits
+    #[serde(rename = "transformations")]
+    pub transformations: i64,
 }
 
-impl DeleteApiKeyResponse {
-    pub fn new(success: bool, message: String) -> DeleteApiKeyResponse {
-        DeleteApiKeyResponse {
-            success,
-            message,
+impl Credits {
+    pub fn new(storage_bytes: i64, api_requests: i64, transformations: i64) -> Credits {
+        Credits {
+            storage_bytes,
+            api_requests,
+            transformations,
         }
     }
 }
-

@@ -22,6 +22,9 @@ pub struct UserSettings {
     /// Email address
     #[serde(rename = "email", skip_serializing_if = "Option::is_none")]
     pub email: Option<String>,
+    /// User's plan
+    #[serde(rename = "plan")]
+    pub plan: String,
     /// Preferred delivery formats (ordered)
     #[serde(rename = "delivery_formats")]
     pub delivery_formats: Vec<String>,
@@ -45,36 +48,38 @@ pub struct UserSettings {
     pub language: String,
     /// Account creation timestamp (Unix epoch)
     #[serde(rename = "created_at")]
-    pub created_at: i32,
+    pub created_at: i64,
     /// Last update timestamp (Unix epoch)
     #[serde(rename = "updated_at")]
-    pub updated_at: i32,
+    pub updated_at: i64,
     /// Total number of uploads
     #[serde(rename = "total_uploads")]
     pub total_uploads: i32,
     /// Total storage used in bytes
     #[serde(rename = "storage_used_bytes")]
-    pub storage_used_bytes: i32,
+    pub storage_used_bytes: i64,
 }
 
 impl UserSettings {
     pub fn new(
         id: String,
         username: String,
+        plan: String,
         delivery_formats: Vec<String>,
         default_quality: i32,
         default_fit_mode: String,
         theme: String,
         language: String,
-        created_at: i32,
-        updated_at: i32,
+        created_at: i64,
+        updated_at: i64,
         total_uploads: i32,
-        storage_used_bytes: i32,
+        storage_used_bytes: i64,
     ) -> UserSettings {
         UserSettings {
             id,
             username,
             email: None,
+            plan,
             delivery_formats,
             default_quality,
             default_fit_mode,

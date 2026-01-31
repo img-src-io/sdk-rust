@@ -28,9 +28,12 @@ pub struct UploadResponse {
     /// Whether this is a newly uploaded image (false if duplicate)
     #[serde(rename = "is_new", skip_serializing_if = "Option::is_none")]
     pub is_new: Option<bool>,
+    /// Image visibility (public or private)
+    #[serde(rename = "visibility")]
+    pub visibility: String,
     /// File size in bytes
     #[serde(rename = "size")]
-    pub size: i32,
+    pub size: i64,
     /// Detected image format
     #[serde(rename = "format")]
     pub format: String,
@@ -51,7 +54,8 @@ impl UploadResponse {
         hash: String,
         url: String,
         paths: Vec<String>,
-        size: i32,
+        visibility: String,
+        size: i64,
         format: String,
         available_formats: models::AvailableFormats,
         uploaded_at: String,
@@ -63,6 +67,7 @@ impl UploadResponse {
             url,
             paths,
             is_new: None,
+            visibility,
             size,
             format,
             dimensions: None,

@@ -23,8 +23,11 @@ pub struct UsageResponse {
     #[serde(rename = "plan_status")]
     pub plan_status: PlanStatus,
     /// Unix timestamp when subscription ends (for cancelling plans)
-    #[serde(rename = "subscription_ends_at")]
-    pub subscription_ends_at: i32,
+    #[serde(
+        rename = "subscription_ends_at",
+        skip_serializing_if = "Option::is_none"
+    )]
+    pub subscription_ends_at: Option<i64>,
     #[serde(rename = "plan_limits")]
     pub plan_limits: Box<models::PlanLimits>,
     /// Total images (lifetime)
@@ -32,7 +35,7 @@ pub struct UsageResponse {
     pub total_images: i32,
     /// Total storage used in bytes
     #[serde(rename = "storage_used_bytes")]
-    pub storage_used_bytes: i32,
+    pub storage_used_bytes: i64,
     /// Total storage used in MB
     #[serde(rename = "storage_used_mb")]
     pub storage_used_mb: f64,
@@ -41,6 +44,8 @@ pub struct UsageResponse {
     pub storage_used_gb: f64,
     #[serde(rename = "current_period")]
     pub current_period: Box<models::CurrentPeriod>,
+    #[serde(rename = "credits")]
+    pub credits: Box<models::Credits>,
 }
 
 impl UsageResponse {
@@ -48,25 +53,26 @@ impl UsageResponse {
         plan: String,
         plan_name: String,
         plan_status: PlanStatus,
-        subscription_ends_at: i32,
         plan_limits: models::PlanLimits,
         total_images: i32,
-        storage_used_bytes: i32,
+        storage_used_bytes: i64,
         storage_used_mb: f64,
         storage_used_gb: f64,
         current_period: models::CurrentPeriod,
+        credits: models::Credits,
     ) -> UsageResponse {
         UsageResponse {
             plan,
             plan_name,
             plan_status,
-            subscription_ends_at,
+            subscription_ends_at: None,
             plan_limits: Box::new(plan_limits),
             total_images,
             storage_used_bytes,
             storage_used_mb,
             storage_used_gb,
             current_period: Box::new(current_period),
+            credits: Box::new(credits),
         }
     }
 }
