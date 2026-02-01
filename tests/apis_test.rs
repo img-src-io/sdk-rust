@@ -316,3 +316,76 @@ fn usage_api_error_enums_deserialize() {
 
     let _: GetUsageError = serde_json::from_value(error_json).unwrap();
 }
+
+// ============================================================
+// ResponseContent and Error type tests
+// ============================================================
+
+#[test]
+fn error_response_content_with_json_body() {
+    let rc = img_src::apis::ResponseContent::<String> {
+        status: reqwest::StatusCode::BAD_REQUEST,
+        content: r#"{"error":{"code":"VALIDATION_ERROR","message":"Invalid params","status":400}}"#
+            .into(),
+        entity: Some("parsed entity".into()),
+    };
+    assert_eq!(rc.status, reqwest::StatusCode::BAD_REQUEST);
+    assert!(rc.content.contains("VALIDATION_ERROR"));
+    assert_eq!(rc.entity, Some("parsed entity".into()));
+}
+
+#[test]
+fn error_response_content_with_text_body() {
+    let rc = img_src::apis::ResponseContent::<String> {
+        status: reqwest::StatusCode::INTERNAL_SERVER_ERROR,
+        content: "Internal Server Error".into(),
+        entity: None,
+    };
+    assert_eq!(rc.status, reqwest::StatusCode::INTERNAL_SERVER_ERROR);
+    assert_eq!(rc.content, "Internal Server Error");
+    assert!(rc.entity.is_none());
+}
+
+#[test]
+fn error_display_response_with_typed_entity() {
+    let rc = img_src::apis::ResponseContent {
+        status: reqwest::StatusCode::FORBIDDEN,
+        content: "forbidden".into(),
+        entity: Some(
+            json!({"error": {"code": "FORBIDDEN", "message": "Access denied", "status": 403}}),
+        ),
+    };
+    let err: img_src::apis::Error<serde_json::Value> = img_src::apis::Error::ResponseError(rc);
+    let display = format!("{}", err);
+    assert!(
+        display.contains("403"),
+        "display should contain status code"
+    );
+    assert!(
+        display.contains("response"),
+        "display should contain 'response'"
+    );
+}
+
+#[test]
+fn error_source_response_error_is_none() {
+    use std::error::Error as StdError;
+    let rc = img_src::apis::ResponseContent::<String> {
+        status: reqwest::StatusCode::NOT_FOUND,
+        content: "not found".into(),
+        entity: None,
+    };
+    let err: img_src::apis::Error<String> = img_src::apis::Error::ResponseError(rc);
+    assert!(
+        err.source().is_none(),
+        "ResponseError should have no source"
+    );
+}
+
+#[test]
+fn error_source_serde_is_some() {
+    use std::error::Error as StdError;
+    let serde_err = serde_json::from_str::<String>("{{bad}}").unwrap_err();
+    let err: img_src::apis::Error<String> = img_src::apis::Error::Serde(serde_err);
+    assert!(err.source().is_some(), "Serde error should have a source");
+}

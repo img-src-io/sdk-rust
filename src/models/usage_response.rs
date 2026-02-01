@@ -23,10 +23,7 @@ pub struct UsageResponse {
     #[serde(rename = "plan_status")]
     pub plan_status: PlanStatus,
     /// Unix timestamp when subscription ends (for cancelling plans)
-    #[serde(
-        rename = "subscription_ends_at",
-        skip_serializing_if = "Option::is_none"
-    )]
+    #[serde(rename = "subscription_ends_at")]
     pub subscription_ends_at: Option<i64>,
     #[serde(rename = "plan_limits")]
     pub plan_limits: Box<models::PlanLimits>,

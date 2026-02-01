@@ -14,31 +14,19 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
 pub struct PlanLimits {
     /// Maximum uploads per month (null = unlimited)
-    #[serde(
-        rename = "max_uploads_per_month",
-        skip_serializing_if = "Option::is_none"
-    )]
+    #[serde(rename = "max_uploads_per_month")]
     pub max_uploads_per_month: Option<i64>,
     /// Maximum storage in bytes (null = unlimited)
-    #[serde(rename = "max_storage_bytes", skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "max_storage_bytes")]
     pub max_storage_bytes: Option<i64>,
     /// Maximum bandwidth per month in bytes (null = unlimited)
-    #[serde(
-        rename = "max_bandwidth_per_month",
-        skip_serializing_if = "Option::is_none"
-    )]
+    #[serde(rename = "max_bandwidth_per_month")]
     pub max_bandwidth_per_month: Option<i64>,
     /// Maximum API requests per month (null = unlimited)
-    #[serde(
-        rename = "max_api_requests_per_month",
-        skip_serializing_if = "Option::is_none"
-    )]
+    #[serde(rename = "max_api_requests_per_month")]
     pub max_api_requests_per_month: Option<i64>,
     /// Maximum image transformations per month (null = unlimited)
-    #[serde(
-        rename = "max_transformations_per_month",
-        skip_serializing_if = "Option::is_none"
-    )]
+    #[serde(rename = "max_transformations_per_month")]
     pub max_transformations_per_month: Option<i64>,
 }
 

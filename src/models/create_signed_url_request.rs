@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Default, Debug, PartialEq, Serialize, Deserialize)]
 pub struct CreateSignedUrlRequest {
-    /// Expiration time in seconds (60-86400, default 3600)
+    /// Expiration time in seconds (60-604800, default 3600)
     #[serde(rename = "expires_in_seconds", skip_serializing_if = "Option::is_none")]
     pub expires_in_seconds: Option<i32>,
 }

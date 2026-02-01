@@ -20,7 +20,7 @@ pub struct Preset {
     #[serde(rename = "name")]
     pub name: String,
     /// Optional description
-    #[serde(rename = "description", skip_serializing_if = "Option::is_none")]
+    #[serde(rename = "description")]
     pub description: Option<String>,
     /// Transformation parameters
     #[serde(rename = "params")]

@@ -445,10 +445,16 @@ fn plan_limits_omitted_fields_deserialize_as_none() {
 }
 
 #[test]
-fn plan_limits_skip_serializing_none() {
+fn plan_limits_none_serialized_as_null() {
     let m = PlanLimits::new();
     let json = serde_json::to_value(&m).unwrap();
-    assert!(json.as_object().unwrap().is_empty());
+    let obj = json.as_object().unwrap();
+    assert_eq!(obj.len(), 5, "all 5 fields must be present");
+    assert!(obj["max_uploads_per_month"].is_null());
+    assert!(obj["max_storage_bytes"].is_null());
+    assert!(obj["max_bandwidth_per_month"].is_null());
+    assert!(obj["max_api_requests_per_month"].is_null());
+    assert!(obj["max_transformations_per_month"].is_null());
 }
 
 #[test]
@@ -911,10 +917,15 @@ fn optional_fields_omitted_when_none() {
 }
 
 #[test]
-fn preset_description_omitted_when_none() {
+fn preset_description_serialized_as_null_when_none() {
     let m = Preset::new("id".into(), "name".into(), HashMap::new(), 0, 0, 0);
     let json = serde_json::to_value(&m).unwrap();
-    assert!(!json.as_object().unwrap().contains_key("description"));
+    let obj = json.as_object().unwrap();
+    assert!(
+        obj.contains_key("description"),
+        "description must be present"
+    );
+    assert!(obj["description"].is_null());
 }
 
 #[test]
@@ -922,4 +933,428 @@ fn error_detail_path_omitted_when_none() {
     let m = ErrorDetail::new("ERR".into(), "msg".into(), 500);
     let json = serde_json::to_value(&m).unwrap();
     assert!(!json.as_object().unwrap().contains_key("path"));
+}
+
+// ============================================================
+// Required-nullable serialization tests
+// ============================================================
+
+#[test]
+fn usage_response_subscription_ends_at_serialized_as_null() {
+    let m = UsageResponse::new(
+        "free".into(),
+        "Free Plan".into(),
+        usage_response::PlanStatus::Active,
+        PlanLimits::new(),
+        0,
+        0,
+        0.0,
+        0.0,
+        CurrentPeriod::new("2024-01".into(), 1704067200, 1706745600, 0, 0, 0, 0),
+        Credits::new(0, 0, 0),
+    );
+    let json = serde_json::to_value(&m).unwrap();
+    let obj = json.as_object().unwrap();
+    assert!(
+        obj.contains_key("subscription_ends_at"),
+        "subscription_ends_at must be present"
+    );
+    assert!(obj["subscription_ends_at"].is_null());
+}
+
+#[test]
+fn plan_limits_mixed_null_and_values() {
+    let m = PlanLimits {
+        max_uploads_per_month: Some(1000),
+        max_storage_bytes: None,
+        max_bandwidth_per_month: Some(5_368_709_120),
+        max_api_requests_per_month: None,
+        max_transformations_per_month: Some(50_000),
+    };
+    let json = serde_json::to_value(&m).unwrap();
+    let obj = json.as_object().unwrap();
+    assert_eq!(obj.len(), 5);
+    assert_eq!(obj["max_uploads_per_month"], 1000);
+    assert!(obj["max_storage_bytes"].is_null());
+    assert_eq!(obj["max_bandwidth_per_month"], 5_368_709_120_i64);
+    assert!(obj["max_api_requests_per_month"].is_null());
+    assert_eq!(obj["max_transformations_per_month"], 50_000);
+    round_trip(&m);
+}
+
+// ============================================================
+// Realistic API response deserialization tests
+// ============================================================
+
+#[test]
+fn realistic_upload_response_full() {
+    let json = json!({
+        "id": "img_abc123def456",
+        "hash": "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
+        "url": "https://cdn.img-src.io/johndoe/photos/vacation/beach.webp",
+        "paths": ["johndoe/photos/vacation/beach.webp", "johndoe/photos/favorites/beach.webp"],
+        "is_new": false,
+        "visibility": "public",
+        "size": 2_457_600_i64,
+        "format": "webp",
+        "dimensions": { "width": 3840, "height": 2160 },
+        "available_formats": {
+            "webp": "johndoe/photos/vacation/beach.webp",
+            "avif": "johndoe/photos/vacation/beach.avif",
+            "jpeg": "johndoe/photos/vacation/beach.jpeg"
+        },
+        "uploaded_at": "2024-07-15T14:30:00Z",
+        "_links": {
+            "self": "/api/v1/images/img_abc123def456",
+            "delete": "/api/v1/images/img_abc123def456"
+        }
+    });
+    let m: UploadResponse = serde_json::from_value(json).unwrap();
+    assert_eq!(m.id, "img_abc123def456");
+    assert_eq!(m.paths.len(), 2);
+    assert_eq!(m.is_new, Some(false));
+    assert_eq!(m.visibility, "public");
+    assert_eq!(m.size, 2_457_600);
+    let dims = m.dimensions.as_ref().unwrap();
+    assert_eq!(dims.width, 3840);
+    assert_eq!(dims.height, 2160);
+    round_trip(&m);
+}
+
+#[test]
+fn realistic_usage_response_free_plan() {
+    let json = json!({
+        "plan": "free",
+        "plan_name": "Free",
+        "plan_status": "active",
+        "subscription_ends_at": null,
+        "plan_limits": {
+            "max_uploads_per_month": 100,
+            "max_storage_bytes": 1_073_741_824_i64,
+            "max_bandwidth_per_month": 5_368_709_120_i64,
+            "max_api_requests_per_month": 10_000,
+            "max_transformations_per_month": 5_000
+        },
+        "total_images": 47,
+        "storage_used_bytes": 524_288_000_i64,
+        "storage_used_mb": 500.0,
+        "storage_used_gb": 0.49,
+        "current_period": {
+            "period": "2024-07",
+            "period_start": 1719792000,
+            "period_end": 1722470400,
+            "uploads": 23,
+            "bandwidth_bytes": 2_147_483_648_i64,
+            "api_requests": 4500,
+            "transformations": 2100
+        },
+        "credits": {
+            "storage_bytes": 0,
+            "api_requests": 0,
+            "transformations": 0
+        }
+    });
+    let m: UsageResponse = serde_json::from_value(json).unwrap();
+    assert_eq!(m.plan, "free");
+    assert_eq!(m.plan_status, usage_response::PlanStatus::Active);
+    assert!(m.subscription_ends_at.is_none());
+    assert_eq!(m.plan_limits.max_uploads_per_month, Some(100));
+    assert_eq!(m.plan_limits.max_storage_bytes, Some(1_073_741_824));
+    assert_eq!(m.total_images, 47);
+    assert_eq!(m.current_period.uploads, 23);
+    round_trip(&m);
+}
+
+#[test]
+fn realistic_usage_response_pro_cancelling() {
+    let json = json!({
+        "plan": "pro",
+        "plan_name": "Pro",
+        "plan_status": "cancelling",
+        "subscription_ends_at": 1722470400_i64,
+        "plan_limits": {
+            "max_uploads_per_month": null,
+            "max_storage_bytes": null,
+            "max_bandwidth_per_month": null,
+            "max_api_requests_per_month": null,
+            "max_transformations_per_month": null
+        },
+        "total_images": 1250,
+        "storage_used_bytes": 10_737_418_240_i64,
+        "storage_used_mb": 10240.0,
+        "storage_used_gb": 10.0,
+        "current_period": {
+            "period": "2024-07",
+            "period_start": 1719792000,
+            "period_end": 1722470400,
+            "uploads": 89,
+            "bandwidth_bytes": 53_687_091_200_i64,
+            "api_requests": 45000,
+            "transformations": 22000
+        },
+        "credits": {
+            "storage_bytes": 5_368_709_120_i64,
+            "api_requests": 100_000,
+            "transformations": 50_000
+        }
+    });
+    let m: UsageResponse = serde_json::from_value(json).unwrap();
+    assert_eq!(m.plan_status, usage_response::PlanStatus::Cancelling);
+    assert_eq!(m.subscription_ends_at, Some(1722470400));
+    assert!(m.plan_limits.max_uploads_per_month.is_none());
+    assert_eq!(m.credits.storage_bytes, 5_368_709_120);
+    round_trip(&m);
+}
+
+#[test]
+fn realistic_image_list_response_with_signed_urls() {
+    let json = json!({
+        "images": [
+            {
+                "id": "img_pub1",
+                "original_filename": "logo.png",
+                "sanitized_filename": "logo.png",
+                "visibility": "public",
+                "size": 45_000,
+                "uploaded_at": "2024-06-01T10:00:00Z",
+                "url": "/api/v1/images/img_pub1",
+                "cdn_url": "https://cdn.img-src.io/user/logo.png",
+                "paths": ["user/logo.png"]
+            },
+            {
+                "id": "img_priv1",
+                "original_filename": "secret-doc.png",
+                "sanitized_filename": "secret-doc.png",
+                "visibility": "private",
+                "size": 1_200_000,
+                "uploaded_at": "2024-06-15T14:30:00Z",
+                "url": "/api/v1/images/img_priv1",
+                "cdn_url": "https://cdn.img-src.io/user/secret-doc.png",
+                "paths": ["user/secret-doc.png"],
+                "active_signed_url": {
+                    "signed_url": "https://cdn.img-src.io/signed/img_priv1?sig=abc123&exp=1700100000",
+                    "expires_at": 1700100000
+                }
+            }
+        ],
+        "folders": [
+            { "name": "photos", "image_count": 25 },
+            { "name": "documents", "image_count": 10 }
+        ],
+        "total": 35,
+        "limit": 20,
+        "offset": 0,
+        "has_more": true,
+        "path_filter": "user"
+    });
+    let m: ImageListResponse = serde_json::from_value(json).unwrap();
+    assert_eq!(m.images.len(), 2);
+    assert_eq!(m.images[0].visibility, "public");
+    assert!(m.images[0].active_signed_url.is_none());
+    assert_eq!(m.images[1].visibility, "private");
+    let signed = m.images[1].active_signed_url.as_ref().unwrap();
+    assert_eq!(signed.expires_at, 1700100000);
+    assert_eq!(m.folders.len(), 2);
+    assert_eq!(m.total, 35);
+    assert!(m.has_more);
+    assert_eq!(m.path_filter, Some("user".into()));
+    round_trip(&m);
+}
+
+#[test]
+fn realistic_preset_with_complex_params() {
+    let json = json!({
+        "id": "preset_thumb_hd",
+        "name": "thumbnail-hd",
+        "description": "High-definition thumbnail with cover crop and quality 90",
+        "params": {
+            "w": 400,
+            "h": 300,
+            "fit": "cover",
+            "q": 90,
+            "format": "webp"
+        },
+        "created_at": 1704067200_i64,
+        "updated_at": 1719792000_i64,
+        "usage_count": 15782
+    });
+    let m: Preset = serde_json::from_value(json).unwrap();
+    assert_eq!(m.name, "thumbnail-hd");
+    assert_eq!(
+        m.description,
+        Some("High-definition thumbnail with cover crop and quality 90".into())
+    );
+    assert_eq!(m.params.len(), 5);
+    assert_eq!(m.params["w"], 400);
+    assert_eq!(m.params["fit"], "cover");
+    assert_eq!(m.usage_count, 15782);
+    round_trip(&m);
+}
+
+#[test]
+fn realistic_metadata_response() {
+    let json = json!({
+        "id": "img_meta123",
+        "visibility": "public",
+        "metadata": {
+            "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "original_filename": "sunset-beach-4k.heic",
+            "size": 8_500_000_i64,
+            "uploaded_at": "2024-03-15T09:45:00Z",
+            "mime_type": "image/heic",
+            "width": 4032,
+            "height": 3024,
+            "dominant_color": "ff7733"
+        },
+        "urls": {
+            "original": "https://cdn.img-src.io/user/sunset-beach-4k.heic",
+            "webp": "https://cdn.img-src.io/user/sunset-beach-4k.webp",
+            "avif": "https://cdn.img-src.io/user/sunset-beach-4k.avif",
+            "jpeg": "https://cdn.img-src.io/user/sunset-beach-4k.jpeg",
+            "png": "https://cdn.img-src.io/user/sunset-beach-4k.png"
+        },
+        "_links": {
+            "self": "/api/v1/images/img_meta123",
+            "delete": "/api/v1/images/img_meta123"
+        }
+    });
+    let m: MetadataResponse = serde_json::from_value(json).unwrap();
+    assert_eq!(m.id, "img_meta123");
+    assert_eq!(m.visibility, "public");
+    assert_eq!(m.metadata.width, Some(4032));
+    assert_eq!(m.metadata.height, Some(3024));
+    assert_eq!(m.metadata.dominant_color, Some("ff7733".into()));
+    assert_eq!(m.metadata.mime_type, "image/heic");
+    assert_eq!(m.metadata.size, 8_500_000);
+    round_trip(&m);
+}
+
+#[test]
+fn realistic_settings_response() {
+    let json = json!({
+        "settings": {
+            "id": "user_abc123",
+            "username": "johndoe",
+            "email": "john@example.com",
+            "plan": "pro",
+            "delivery_formats": ["webp", "avif", "jpeg"],
+            "default_quality": 85,
+            "default_fit_mode": "cover",
+            "default_max_width": 3840,
+            "default_max_height": 2160,
+            "theme": "dark",
+            "language": "en",
+            "created_at": 1672531200_i64,
+            "updated_at": 1719792000_i64,
+            "total_uploads": 1250,
+            "storage_used_bytes": 10_737_418_240_i64
+        }
+    });
+    let m: SettingsResponse = serde_json::from_value(json).unwrap();
+    assert_eq!(m.settings.username, "johndoe");
+    assert_eq!(m.settings.plan, "pro");
+    assert_eq!(m.settings.email, Some("john@example.com".into()));
+    assert_eq!(m.settings.delivery_formats.len(), 3);
+    assert_eq!(m.settings.default_quality, 85);
+    assert_eq!(m.settings.default_max_width, Some(3840));
+    assert_eq!(m.settings.default_max_height, Some(2160));
+    assert_eq!(m.settings.storage_used_bytes, 10_737_418_240);
+    round_trip(&m);
+}
+
+// ============================================================
+// Boundary value tests
+// ============================================================
+
+#[test]
+fn user_settings_quality_boundary_values() {
+    let min_json = json!({
+        "id": "u1", "username": "u", "plan": "free",
+        "delivery_formats": ["webp"], "default_quality": 1,
+        "default_fit_mode": "cover", "theme": "light", "language": "en",
+        "created_at": 0, "updated_at": 0, "total_uploads": 0, "storage_used_bytes": 0
+    });
+    let m: UserSettings = serde_json::from_value(min_json).unwrap();
+    assert_eq!(m.default_quality, 1);
+
+    let max_json = json!({
+        "id": "u2", "username": "u", "plan": "free",
+        "delivery_formats": ["webp"], "default_quality": 100,
+        "default_fit_mode": "cover", "theme": "light", "language": "en",
+        "created_at": 0, "updated_at": 0, "total_uploads": 0, "storage_used_bytes": 0
+    });
+    let m: UserSettings = serde_json::from_value(max_json).unwrap();
+    assert_eq!(m.default_quality, 100);
+}
+
+#[test]
+fn create_signed_url_expires_in_boundary_values() {
+    // Minimum: 60 seconds
+    let min_json = json!({ "expires_in_seconds": 60 });
+    let m: CreateSignedUrlRequest = serde_json::from_value(min_json).unwrap();
+    assert_eq!(m.expires_in_seconds, Some(60));
+
+    // Maximum: 604800 seconds (7 days)
+    let max_json = json!({ "expires_in_seconds": 604800 });
+    let m: CreateSignedUrlRequest = serde_json::from_value(max_json).unwrap();
+    assert_eq!(m.expires_in_seconds, Some(604800));
+}
+
+#[test]
+fn plan_limits_large_boundary_values() {
+    let m = PlanLimits {
+        max_uploads_per_month: Some(i64::MAX),
+        max_storage_bytes: Some(i64::MAX),
+        max_bandwidth_per_month: Some(i64::MAX),
+        max_api_requests_per_month: Some(i64::MAX),
+        max_transformations_per_month: Some(i64::MAX),
+    };
+    round_trip(&m);
+    assert_eq!(m.max_uploads_per_month, Some(i64::MAX));
+}
+
+// ============================================================
+// Missing required non-optional field error tests
+// ============================================================
+
+#[test]
+fn upload_response_missing_visibility_fails() {
+    let json = json!({
+        "id": "abc",
+        "hash": "h",
+        "url": "u",
+        "paths": [],
+        "size": 0,
+        "format": "webp",
+        "available_formats": { "webp": "w", "avif": "a", "jpeg": "j" },
+        "uploaded_at": "t",
+        "_links": { "self": "/s", "delete": "/d" }
+    });
+    let result = serde_json::from_value::<UploadResponse>(json);
+    assert!(result.is_err(), "missing 'visibility' should fail");
+}
+
+#[test]
+fn metadata_response_missing_id_fails() {
+    let json = json!({
+        "visibility": "public",
+        "metadata": {
+            "hash": "h", "original_filename": "f", "size": 0,
+            "uploaded_at": "t", "mime_type": "image/png"
+        },
+        "urls": { "original": "o", "webp": "w", "avif": "a", "jpeg": "j", "png": "p" },
+        "_links": { "self": "/s", "delete": "/d" }
+    });
+    let result = serde_json::from_value::<MetadataResponse>(json);
+    assert!(result.is_err(), "missing 'id' should fail");
+}
+
+#[test]
+fn search_response_missing_query_fails() {
+    let json = json!({
+        "results": [],
+        "total": 0
+    });
+    let result = serde_json::from_value::<SearchResponse>(json);
+    assert!(result.is_err(), "missing 'query' should fail");
 }
