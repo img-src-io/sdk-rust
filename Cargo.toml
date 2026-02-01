@@ -1,6 +1,6 @@
 [package]
 name = "img_src"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Taehun <taehun@taehun.dev>"]
 description = "Rust SDK for img-src image processing and delivery API"
 license = "MIT"
