@@ -58,3 +58,43 @@ All API functions are async, take `&Configuration` as first argument, and return
 - Files protected from regeneration: `.openapi-generator-ignore`
 - Source spec: `api/openapi.json` in the parent img-src repository
 - API changes should be made to the OpenAPI spec, not directly to this SDK
+
+### Post-Generation Fix: Required-Nullable Fields
+
+OpenAPI Generator adds `skip_serializing_if = "Option::is_none"` to all `Option<T>` fields. For fields marked `required: true, nullable: true` in the spec, this is incorrect — they must serialize as `null`, not be omitted. After regeneration, remove `skip_serializing_if` from these fields:
+
+- `src/models/plan_limits.rs` — all 5 fields
+- `src/models/preset.rs` — `description`
+- `src/models/usage_response.rs` — `subscription_ends_at`
+
+## Deployment
+
+### Publishing to crates.io
+
+1. Update `version` in `Cargo.toml`
+2. Commit: `git commit -am "Bump version to X.Y.Z"`
+3. Tag and push: `git tag vX.Y.Z && git push origin main --tags`
+4. CD workflow (`.github/workflows/cd.yml`) auto-publishes to crates.io
+
+The CD workflow verifies the tag matches `Cargo.toml` version, runs build + unit tests, then publishes. Requires `CARGO_REGISTRY_TOKEN` GitHub secret (from https://crates.io/settings/tokens).
+
+## Testing
+
+### Unit Tests
+
+```bash
+cargo test --test models_test --test apis_test
+```
+
+- `tests/models_test.rs` — 80 tests: serialization round-trips, realistic API responses, boundary values, missing required fields
+- `tests/apis_test.rs` — 36 tests: Configuration, urlencode, parse_deep_object, Error types, API error enum deserialization
+
+### Integration Tests
+
+Full end-to-end test against the live API. Marked `#[ignore]` to avoid CI failures.
+
+```bash
+IMGSRC_API_KEY=imgsrc_... cargo test --test integration_test -- --ignored --nocapture
+```
+
+Requires a valid API key. Covers: upload, list, search, get, update visibility, delete, settings, usage, presets (Pro), signed URLs (Pro).
