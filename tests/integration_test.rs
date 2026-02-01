@@ -90,6 +90,7 @@ impl<'a> Drop for CleanupGuard<'a> {
 }
 
 #[tokio::test]
+#[ignore] // requires IMGSRC_API_KEY env var — run with: cargo test --test integration_test -- --ignored
 async fn full_integration() {
     let config = make_config();
     let mut cleanup = CleanupGuard {

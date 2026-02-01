@@ -2,6 +2,8 @@
 
 Developer-friendly & type-safe Rust SDK specifically catered to leverage *img-src* API.
 
+[![Crates.io](https://img.shields.io/crates/v/img_src?style=for-the-badge&logo=rust&logoColor=white&label=crates.io&color=e6590a&labelColor=2b2d42)](https://crates.io/crates/img_src)
+[![docs.rs](https://img.shields.io/docsrs/img_src?style=for-the-badge&logo=docs.rs&logoColor=white&label=docs.rs&color=1a73e8&labelColor=2b2d42)](https://docs.rs/img_src)
 [![License: MIT](https://img.shields.io/badge/LICENSE_//_MIT-3b5bdb?style=for-the-badge&labelColor=eff6ff)](https://opensource.org/licenses/MIT)
 
 <br /><br />
@@ -60,7 +62,7 @@ Add the SDK as a dependency to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-img_src = "0.1.0"
+img_src = "0.2.0"
 ```
 
 Or install via cargo:
