@@ -109,12 +109,7 @@ async fn full_integration() {
     let username = settings.username.clone();
     let plan = settings.plan.clone();
     let original_quality = settings.default_quality;
-    let masked = if username.len() > 3 {
-        format!("{}***", &username[..3])
-    } else {
-        "***".to_string()
-    };
-    println!("[PASS] get_settings: username={masked}, plan={plan}");
+    println!("[PASS] get_settings: plan={plan}");
 
     let is_pro = plan == "pro";
 
