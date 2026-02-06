@@ -22,10 +22,28 @@ pub struct AvailableFormats {
     /// JPEG format URL
     #[serde(rename = "jpeg")]
     pub jpeg: String,
+    /// PNG format URL
+    #[serde(rename = "png")]
+    pub png: String,
+    /// JXL format URL
+    #[serde(rename = "jxl")]
+    pub jxl: String,
 }
 
 impl AvailableFormats {
-    pub fn new(webp: String, avif: String, jpeg: String) -> AvailableFormats {
-        AvailableFormats { webp, avif, jpeg }
+    pub fn new(
+        webp: String,
+        avif: String,
+        jpeg: String,
+        png: String,
+        jxl: String,
+    ) -> AvailableFormats {
+        AvailableFormats {
+            webp,
+            avif,
+            jpeg,
+            png,
+            jxl,
+        }
     }
 }

@@ -28,16 +28,27 @@ pub struct CdnUrls {
     /// PNG format URL
     #[serde(rename = "png")]
     pub png: String,
+    /// JXL format URL
+    #[serde(rename = "jxl")]
+    pub jxl: String,
 }
 
 impl CdnUrls {
-    pub fn new(original: String, webp: String, avif: String, jpeg: String, png: String) -> CdnUrls {
+    pub fn new(
+        original: String,
+        webp: String,
+        avif: String,
+        jpeg: String,
+        png: String,
+        jxl: String,
+    ) -> CdnUrls {
         CdnUrls {
             original,
             webp,
             avif,
             jpeg,
             png,
+            jxl,
         }
     }
 }

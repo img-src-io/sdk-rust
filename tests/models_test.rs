@@ -87,7 +87,7 @@ fn upload_response_has_visibility_and_i64_size() {
         "visibility": "public",
         "size": 5_368_709_120_i64,
         "format": "webp",
-        "available_formats": { "webp": "u.webp", "avif": "u.avif", "jpeg": "u.jpeg" },
+        "available_formats": { "webp": "u.webp", "avif": "u.avif", "jpeg": "u.jpeg", "png": "u.png", "jxl": "u.jxl" },
         "uploaded_at": "2024-01-01T00:00:00Z",
         "_links": { "self": "/api/v1/images/abc123", "delete": "/api/v1/images/abc123" }
     });
@@ -107,7 +107,7 @@ fn upload_response_constructor() {
         "public".into(),
         1024,
         "webp".into(),
-        AvailableFormats::new("w".into(), "a".into(), "j".into()),
+        AvailableFormats::new("w".into(), "a".into(), "j".into(), "p".into(), "x".into()),
         "2024-01-01".into(),
         HateoasLinks::new("/self".into(), "/del".into()),
     );
@@ -220,7 +220,7 @@ fn metadata_response_has_visibility() {
             "mime_type": "image/png"
         },
         "urls": {
-            "original": "o", "webp": "w", "avif": "a", "jpeg": "j", "png": "p"
+            "original": "o", "webp": "w", "avif": "a", "jpeg": "j", "png": "p", "jxl": "x"
         },
         "_links": { "self": "/s", "delete": "/d" }
     });
@@ -235,7 +235,14 @@ fn metadata_response_constructor() {
         "id".into(),
         "public".into(),
         ImageMetadata::new("h".into(), "f".into(), 1024, "t".into(), "image/png".into()),
-        CdnUrls::new("o".into(), "w".into(), "a".into(), "j".into(), "p".into()),
+        CdnUrls::new(
+            "o".into(),
+            "w".into(),
+            "a".into(),
+            "j".into(),
+            "p".into(),
+            "x".into(),
+        ),
         HateoasLinks::new("/s".into(), "/d".into()),
     );
     assert_eq!(m.visibility, "public");
@@ -602,13 +609,26 @@ fn image_metadata_constructor() {
 
 #[test]
 fn available_formats_serde() {
-    let m = AvailableFormats::new("w.webp".into(), "a.avif".into(), "j.jpeg".into());
+    let m = AvailableFormats::new(
+        "w.webp".into(),
+        "a.avif".into(),
+        "j.jpeg".into(),
+        "p.png".into(),
+        "x.jxl".into(),
+    );
     round_trip(&m);
 }
 
 #[test]
 fn cdn_urls_serde() {
-    let m = CdnUrls::new("o".into(), "w".into(), "a".into(), "j".into(), "p".into());
+    let m = CdnUrls::new(
+        "o".into(),
+        "w".into(),
+        "a".into(),
+        "j".into(),
+        "p".into(),
+        "x".into(),
+    );
     round_trip(&m);
 }
 
@@ -879,7 +899,7 @@ fn upload_response_minimal_required_fields() {
         "visibility": "public",
         "size": 0,
         "format": "",
-        "available_formats": { "webp": "", "avif": "", "jpeg": "" },
+        "available_formats": { "webp": "", "avif": "", "jpeg": "", "png": "", "jxl": "" },
         "uploaded_at": "",
         "_links": { "self": "", "delete": "" }
     });
@@ -1001,7 +1021,9 @@ fn realistic_upload_response_full() {
         "available_formats": {
             "webp": "johndoe/photos/vacation/beach.webp",
             "avif": "johndoe/photos/vacation/beach.avif",
-            "jpeg": "johndoe/photos/vacation/beach.jpeg"
+            "jpeg": "johndoe/photos/vacation/beach.jpeg",
+            "png": "johndoe/photos/vacation/beach.png",
+            "jxl": "johndoe/photos/vacation/beach.jxl"
         },
         "uploaded_at": "2024-07-15T14:30:00Z",
         "_links": {
@@ -1211,7 +1233,8 @@ fn realistic_metadata_response() {
             "webp": "https://cdn.img-src.io/user/sunset-beach-4k.webp",
             "avif": "https://cdn.img-src.io/user/sunset-beach-4k.avif",
             "jpeg": "https://cdn.img-src.io/user/sunset-beach-4k.jpeg",
-            "png": "https://cdn.img-src.io/user/sunset-beach-4k.png"
+            "png": "https://cdn.img-src.io/user/sunset-beach-4k.png",
+            "jxl": "https://cdn.img-src.io/user/sunset-beach-4k.jxl"
         },
         "_links": {
             "self": "/api/v1/images/img_meta123",
@@ -1326,7 +1349,7 @@ fn upload_response_missing_visibility_fails() {
         "paths": [],
         "size": 0,
         "format": "webp",
-        "available_formats": { "webp": "w", "avif": "a", "jpeg": "j" },
+        "available_formats": { "webp": "w", "avif": "a", "jpeg": "j", "png": "p", "jxl": "x" },
         "uploaded_at": "t",
         "_links": { "self": "/s", "delete": "/d" }
     });
@@ -1342,7 +1365,7 @@ fn metadata_response_missing_id_fails() {
             "hash": "h", "original_filename": "f", "size": 0,
             "uploaded_at": "t", "mime_type": "image/png"
         },
-        "urls": { "original": "o", "webp": "w", "avif": "a", "jpeg": "j", "png": "p" },
+        "urls": { "original": "o", "webp": "w", "avif": "a", "jpeg": "j", "png": "p", "jxl": "x" },
         "_links": { "self": "/s", "delete": "/d" }
     });
     let result = serde_json::from_value::<MetadataResponse>(json);
